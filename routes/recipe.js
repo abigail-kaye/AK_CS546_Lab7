@@ -15,7 +15,6 @@ router.get("/:id", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const recipeList = await recipeData.getAllRecipies();
-    console.log("Hi");
     res.json(recipeList);
   } catch (e) {
     res.status(500).json({ error: e });
