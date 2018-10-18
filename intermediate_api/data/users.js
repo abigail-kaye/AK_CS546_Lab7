@@ -1,3 +1,4 @@
+/*
 const mongoCollections = require("../config/mongoCollections");
 const users = mongoCollections.users;
 const uuid = require("node-uuid");
@@ -97,3 +98,4 @@ let exportedMethods = {
 };
 
 module.exports = exportedMethods;
+*/

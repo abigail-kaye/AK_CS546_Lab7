@@ -1,3 +1,4 @@
+/*
 const express = require("express");
 const router = express.Router();
 const data = require("../data");
@@ -101,3 +102,4 @@ router.delete("/:id", async (req, res) => {
 });
 
 module.exports = router;
+*/

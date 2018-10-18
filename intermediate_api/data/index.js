@@ -1,9 +1,5 @@
-const postData = require("./posts");
-// const userData = require("./users");
+const recipeData = require("./recipe");
 
 module.exports = {
-  // users: userData,
-  posts: postData
+  recipe: recipeData
 };
-
-//////////// needs to be changed
