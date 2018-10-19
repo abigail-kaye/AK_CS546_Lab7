@@ -25,7 +25,7 @@ router.post("/", async (req, res) => {
   const rawRecipeData = req.body;
   try {
     const { title, ingredients, steps} = rawRecipeData;
-    const newRecipe = await recipeData.makeRecipe(title, ingredients, steps);
+    const newRecipe = await recipeData.addRecipe(title, ingredients, steps);
 
     res.json(newRecipe);
   } catch (e) {
@@ -39,7 +39,7 @@ router.put("/:id", async (req, res) => {
   try {
     await recipeData.getRecipe(req.params.id);
   } catch (e) {
-    res.status(404).json({ error: "Post not found" });
+    res.status(404).json({ error: "Recipe not found" });
   }
 
   try {

@@ -1,34 +1,51 @@
-const uuidv4 = require('uuid/v4');
+// const uuidv4 = require('uuid/v4');
 
-async function main() {
-  const connection = await MongoClient.connect(settings.mongoConfig.serverUrl);
-  const db = await connection.db(settings.mongoConfig.database);
-  const recipeCollection = db.collection("lab7");
+//   const connection = await MongoClient.connect(settings.mongoConfig.serverUrl);
+//   const db = await connection.db(settings.mongoConfig.database);
+//   const recipeCollection = db.collection("lab7");
 
-  exports.getAllRecipies = async () => {
+const mongoCollections = require("../config/mongoCollections");
+const recipe = mongoCollections.recipe;
+const uuid = require("node-uuid");
+
+const exportedMethods = {
+  async getAllRecipies() {
+    const recipeCollection = await recipe();
     return await recipeCollection.find().toArray();
-  };
+  },
 
-  exports.getRecipe = async id => {
+  async getRecipe(id) {
     if (id === undefined) throw "You must provide an ID";
+    const recipeCollection = await recipe();
     const recipe = await recipeCollection.findOne({ _id: id });
-
-    if (!recipe) {
-      throw "Could not find recipe with id of " + id;
-    }
+    if (!recipe)
+      throw  "Recipe not found";
     return recipe;
-  };
+  },
 
-  exports.makeRecipe = async (title, ingredients, steps) => {
-    return {
-      _id: uuidv4(),
+  async addRecipe(title, ingredients, steps) {
+    if (typeof title !== "string") throw "No title provided";
+    if (typeof ingredients !== "string") throw "Incorrect body type!";
+    if (!Array.isArray(steps)) {
+      steps = [];
+    }
+
+    const recipeCollection = await recipe();
+    const newRecipe = {
+      _id: uuid.v4(),
       title: title,
-      ingredients : [ingredients],
-      steps: [steps]
+      ingredients : {
+        ingredient: ingredients,
+        amount: amount
+      },
+      steps: steps
     };
-  };
+    const newInsertInformation = await recipeCollection.insertOne(newRecipe);
+    const newId = newInsertInformation.insertedId;
+    return await this.getPostById(newId);
+  },
 
-  // exports.addIngredient = async (recipe, name, amount) => {
+  // module.exports.addIngredient = async (recipe, name, amount) => {
   //   const newIngredient = {
   //     name: name,
   //     amount: amount,
@@ -36,24 +53,9 @@ async function main() {
   //   recipe.ingredients.push(newIngredient);
   // };
 
-  exports.findByTitle = async title => {
-    if (!title) throw "You must provide a title";
 
-    return await recipeCollection
-      .find({ "recipe title": title })
-      .toArray();
-  };
-
-  exports.findByIngredients = async potentialIngredients => {
-    if (!potentialIngredients)
-      throw "You must provide an array of potentially matching ingredient";
-
-    return await recipeCollection
-      .find({ ingredients: { $in: potentialIngredients } })
-      .toArray();
-  };
-
-  exports.updateRecipe = async (id, updatedRecipe) => {
+   async updateRecipe(id, updatedRecipe) {
+    const recipeCollection = await recipe();
     const updatedRecipeData = {};
 
     if (updatedRecipe.title) {
@@ -76,27 +78,27 @@ async function main() {
     };
     await recipeCollection.updateOne(query, updateCommand);
 
-    return await exports.getRecipe(id);
-  };
+    return await this.getRecipe(id);
+  },
   
-  exports.renameID = async (oldID, newID) => {
+  async renameID(oldID, newID) {
     if (oldID === undefined) return Promise.reject("No old id provided");
     if (newID === undefined) return Promise.reject("No new id provided");
 
     let findRecipe = getRecipe(oldID);
     findRecipe._id = newID;
-
-    return await exports.getRecipe(newID);
-  };
+    return await this.getRecipe(newID);
+  },
  
 
-  exports.removeRecipe = async id => {
+  async removeRecipe(id) {
+    const recipeCollection = await recipe();
+
     if (id === undefined) return Promise.reject("No id provided");
     const deletionInfo = await recipeCollection.removeOne({ _id: id});
     if (deletionInfo.deletedCount === 0){
       throw `Could not delete recipe with id of ${id}`;
     }
-  };
-}
-
-main();
+  }
+};
+module.exports = exportedMethods;
