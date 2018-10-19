@@ -5,7 +5,8 @@ const recipeData = data.recipe;
 
 router.get("/:id", async (req, res) => {
   try {
-    const recipe = await postData.getRecipe(req.params.id);
+    // console.log(req.params.id);
+    const recipe = await recipeData.getRecipe(req.params.id);
     res.json(recipe);
   } catch (e) {
     res.status(404).json({ error: "Recipe not found" });
@@ -46,7 +47,7 @@ router.put("/:id", async (req, res) => {
     const updatedRecipe = await recipeData.renameID(req.params.id, updatedData);
     res.json(updatedRecipe);
   } catch (e) {
-    res.status(500).json({ error: e });
+    res.status(500).json({ error: "Problem updating the recipe" });
   }
 });
 
@@ -62,7 +63,7 @@ router.patch("/:id", async (req, res) => {
     const updatedRecipe = await recipeData.updateRecipe(req.params.id, updatedData);
     res.json(updatedRecipe);
   } catch (e) {
-    res.status(500).json({ error: e });
+    res.status(500).json({error: "Problem updated the recipe"});
   }
 });
 
@@ -75,7 +76,7 @@ router.delete("/:id", async (req, res) => {
   try {
     await recipeData.removeRecipe(req.params.id);
   } catch (e) {
-    res.status(500).json({ error: e });
+    res.status(500).json({ error: "Unable to delete recipe" });
   }
 });
 

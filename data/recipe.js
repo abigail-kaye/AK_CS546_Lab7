@@ -17,15 +17,15 @@ const exportedMethods = {
   async getRecipe(id) {
     if (id === undefined) throw "You must provide an ID";
     const recipeCollection = await recipe();
-    const recipe = await recipeCollection.findOne({ _id: id });
-    if (!recipe)
+    const recipeR = await recipeCollection.findOne({ _id: id });
+    if (!recipeR)
       throw  "Recipe not found";
-    return recipe;
+    return recipeR;
   },
 
-  async addRecipe(title, ingredients, steps) {
+  async addRecipe(title, ing, steps) {
     if (typeof title !== "string") throw "No title provided";
-    if (typeof ingredients !== "string") throw "Incorrect body type!";
+    if (!ing) throw "No ingredients provided";
     if (!Array.isArray(steps)) {
       steps = [];
     }
@@ -35,14 +35,14 @@ const exportedMethods = {
       _id: uuid.v4(),
       title: title,
       ingredients : {
-        ingredient: ingredients,
-        amount: amount
+        name: ing.name,
+        amount: ing.amount
       },
       steps: steps
     };
     const newInsertInformation = await recipeCollection.insertOne(newRecipe);
     const newId = newInsertInformation.insertedId;
-    return await this.getPostById(newId);
+    return await this.getRecipe(newId);
   },
 
   // module.exports.addIngredient = async (recipe, name, amount) => {
@@ -59,7 +59,7 @@ const exportedMethods = {
     const updatedRecipeData = {};
 
     if (updatedRecipe.title) {
-      updatedRecipe.title = updatedRecipe.title;
+      updatedRecipeData.title = updatedRecipe.title;
     }
 
     if (updatedRecipe.instructions) {
@@ -81,22 +81,24 @@ const exportedMethods = {
     return await this.getRecipe(id);
   },
   
-  async renameID(oldID, newID) {
-    if (oldID === undefined) return Promise.reject("No old id provided");
-    if (newID === undefined) return Promise.reject("No new id provided");
+  async renameID(id, updatedRecipe) {
+    if (id === undefined) return Promise.reject("No id provided");
+    let oldID = id;
+    this.removeRecipe(id);
+    let newRecipe = this.addRecipe(updatedRecipe.title,updatedRecipe.instructions,updatedRecipe.steps);
+    newRecipe._id = oldID;
 
-    let findRecipe = getRecipe(oldID);
-    findRecipe._id = newID;
-    return await this.getRecipe(newID);
+    return await this.getRecipe(id);
   },
  
 
   async removeRecipe(id) {
-    const recipeCollection = await recipe();
+    if (!id) throw "You must provide an id to search for";
 
-    if (id === undefined) return Promise.reject("No id provided");
-    const deletionInfo = await recipeCollection.removeOne({ _id: id});
-    if (deletionInfo.deletedCount === 0){
+    const recipeCollection = await recipe();
+    const deletionInfo = await recipeCollection.removeOne({ _id: id });
+
+    if (deletionInfo.deletedCount === 0) {
       throw `Could not delete recipe with id of ${id}`;
     }
   }
