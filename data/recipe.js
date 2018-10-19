@@ -1,9 +1,3 @@
-// const uuidv4 = require('uuid/v4');
-
-//   const connection = await MongoClient.connect(settings.mongoConfig.serverUrl);
-//   const db = await connection.db(settings.mongoConfig.database);
-//   const recipeCollection = db.collection("lab7");
-
 const mongoCollections = require("../config/mongoCollections");
 const recipe = mongoCollections.recipe;
 const uuid = require("node-uuid");
@@ -62,8 +56,8 @@ const exportedMethods = {
       updatedRecipeData.title = updatedRecipe.title;
     }
 
-    if (updatedRecipe.instructions) {
-      updatedRecipeData.instructions = updatedRecipe.instructions;
+    if (updatedRecipe.ingredients) {
+      updatedRecipeData.ingredients = updatedRecipe.ingredients;
     }
     
     if (updatedRecipe.steps) {
@@ -82,12 +76,9 @@ const exportedMethods = {
   },
   
   async renameID(id, updatedRecipe) {
-    if (id === undefined) return Promise.reject("No id provided");
-    let oldID = id;
-    this.removeRecipe(id);
-    let newRecipe = this.addRecipe(updatedRecipe.title,updatedRecipe.instructions,updatedRecipe.steps);
-    newRecipe._id = oldID;
-
+    const recipeCollection = await recipe();
+    let updateCommand = {$set: updatedRecipe};
+    await recipeCollection.updateOne({_id:id}, updateCommand);
     return await this.getRecipe(id);
   },
  
@@ -96,7 +87,7 @@ const exportedMethods = {
     if (!id) throw "You must provide an id to search for";
 
     const recipeCollection = await recipe();
-    const deletionInfo = await recipeCollection.removeOne({ _id: id });
+    await recipeCollection.removeOne({ _id: id });
 
     if (deletionInfo.deletedCount === 0) {
       throw `Could not delete recipe with id of ${id}`;

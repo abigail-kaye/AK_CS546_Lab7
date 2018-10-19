@@ -5,7 +5,6 @@ const recipeData = data.recipe;
 
 router.get("/:id", async (req, res) => {
   try {
-    // console.log(req.params.id);
     const recipe = await recipeData.getRecipe(req.params.id);
     res.json(recipe);
   } catch (e) {
